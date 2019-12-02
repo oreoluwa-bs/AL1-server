@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -6,6 +7,22 @@ app.use(express.json());
 app.use(express.urlencoded({
     extended: true,
 }));
+
+const mongoConnectString = process.env.DB_CONNECT_STR || 'mongodb://localhost:27017/algolearndbone';
+mongoose.connect(mongoConnectString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+    .then(() => {
+        // eslint-disable-next-line no-console
+        console.log('Successfully connected to Database');
+    })
+    .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log('Unable to connect to Database!');
+        // eslint-disable-next-line no-console
+        console.error(err);
+    });
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

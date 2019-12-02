@@ -1,0 +1,29 @@
+{
+  "name": "Algolearn-api",
+  "version": "1.0.0",
+  "description": "This is handles all my api code",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oreoluwa-bs/Algolearn-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oreoluwa-bs/Algolearn-api/issues"
+  },
+  "homepage": "https://github.com/oreoluwa-bs/Algolearn-api#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.7.2",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  }
+}

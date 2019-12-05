@@ -100,7 +100,7 @@ const editUser = (req, res) => {
                 password: hash,
                 enrolledCourses: oldUser.enrolledCourses,
             });
-            user.updateOne({ _id: req.params.userId }, user).then(() => {
+            User.updateOne({ _id: req.params.userId }, user).then(() => {
                 res.status(200).json({
                     status: 'success',
                     message: 'User has been updated',

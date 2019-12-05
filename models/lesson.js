@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 
 const referenceSchema = mongoose.Schema({
-    reference: { type: String },
-    referenceLink: { type: String },
+    reference: { type: String, trim: true },
+    referenceLink: { type: String, trim: true },
 });
 
 const lessonSchema = mongoose.Schema({
-    videoURL: { type: String },
+    videoURL: { type: String, trim: true },
     textContent: { type: String },
     references: [referenceSchema],
 });

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('../config');
 
 const userRoutes = require('../routes/auth');
+const courseRoutes = require('../routes/course');
 
 const app = express();
 
@@ -40,5 +41,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/v1/auth', userRoutes);
+
+app.use('/api/v1/course', courseRoutes);
 
 module.exports = app;

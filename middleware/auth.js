@@ -7,15 +7,16 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, config.decrypt_me);
         const { userId } = decodedToken;
         if (req.body.userId && req.body.userId !== userId) {
-            res.json({
+            res.status(400).json({
                 status: 'error',
                 message: 'Invalid user ID',
             });
         } else {
+            res.locals.userId = userId;
             next();
         }
     } catch (err) {
-        res.status(200).json({
+        res.status(400).json({
             status: 'error',
             message: 'User not authenticated',
         });

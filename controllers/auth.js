@@ -11,6 +11,7 @@ const signup = (req, res) => {
             firstname: req.body.firstname,
             lastname: req.body.lastname,
             email: req.body.email,
+            role: req.body.role,
             password: hash,
         });
         user.save().then((data) => {
@@ -54,6 +55,7 @@ const login = (req, res) => {
             );
             res.status(200).json({
                 status: 'success',
+                userId: user.id,
                 token,
             });
         }).catch((err) => {

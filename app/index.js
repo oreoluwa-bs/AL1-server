@@ -1,28 +1,36 @@
+/* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
+const config = require('../config');
+
+const userRoutes = require('../routes/auth');
 
 const app = express();
+
+
+mongoose.connect(config.dbConnectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+})
+    .then(() => {
+        console.log('Successfully connected to Database');
+    })
+    .catch((error) => {
+        console.log({
+            message: 'Unable to connect to Database!',
+            error,
+        });
+    });
 
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true,
 }));
 
-const mongoConnectString = process.env.DB_CONNECT_STR || 'mongodb://localhost:27017/algolearndbone';
-mongoose.connect(mongoConnectString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => {
-        // eslint-disable-next-line no-console
-        console.log('Successfully connected to Database');
-    })
-    .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log('Unable to connect to Database!');
-        // eslint-disable-next-line no-console
-        console.error(err);
-    });
+app.listen(config.port, () => {
+    console.log(`App is running on port ${config.port}`);
+});
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,18 +39,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/', (req, res) => {
-    res.status(200).json({
-        status: '200',
-        message: 'Hello World',
-    });
-});
-
-
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`App is running on port ${port}`);
-});
+app.use('/api/v1/auth', userRoutes);
 
 module.exports = app;

@@ -19,8 +19,11 @@
   },
   "homepage": "https://github.com/oreoluwa-bs/Algolearn-api#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
-    "mongoose": "^5.7.13"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.7.13",
+    "mongoose-unique-validator": "^2.0.3"
   },
   "devDependencies": {
     "eslint": "^6.7.2",

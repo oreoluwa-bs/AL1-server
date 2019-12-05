@@ -11,5 +11,9 @@ router.post('/create-user', db.signup);
 
 router.post('/login', db.login);
 
+router.put('/:userId', db.editUser);
+
+router.delete('/:userId', db.deleteUser);
+
 
 module.exports = router;

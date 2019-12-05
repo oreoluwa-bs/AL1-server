@@ -86,8 +86,63 @@ const getUsers = (req, res) => {
     });
 };
 
+
+const editUser = (req, res) => {
+    User.findById(req.params.userId).then((result) => {
+        const oldUser = result;
+        bcrypt.hash(req.body.password, 10).then((hash) => {
+            const user = new User({
+                _id: oldUser.id,
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                email: req.body.email,
+                role: req.body.role,
+                password: hash,
+                enrolledCourses: oldUser.enrolledCourses,
+            });
+            user.updateOne({ _id: req.params.userId }, user).then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'User has been updated',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
+        });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
+const deleteUser = (req, res) => {
+    User.deleteOne({ _id: req.params.userId }).then(() => {
+        res.status(200).json({
+            status: 'success',
+            message: 'User account has been deleted',
+        });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
 module.exports = {
     signup,
     login,
     getUsers,
+    deleteUser,
+    editUser,
 };

@@ -126,17 +126,24 @@ const editUser = (req, res) => {
 };
 
 const deleteUser = (req, res) => {
-    User.deleteOne({ _id: req.params.userId }).then(() => {
-        res.status(200).json({
-            status: 'success',
-            message: 'User account has been deleted',
+    if (res.locals.userId === req.params.userId) {
+        User.deleteOne({ _id: req.params.userId }).then(() => {
+            res.status(200).json({
+                status: 'success',
+                message: 'User account has been deleted',
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
         });
-    }).catch((err) => {
+    } else {
         res.status(400).json({
             status: 'error',
-            message: err,
+            message: 'Only user can delete this account',
         });
-    });
+    }
 };
 
 module.exports = {

@@ -22,6 +22,7 @@ const createCourse = (req, res) => {
         title: req.body.title,
         description: req.body.description,
         authorId: jwt.verify(token, config.decrypt_me).userId,
+        ratings: [0],
     });
 
     course.save()
@@ -299,6 +300,30 @@ const editQuestion = (req, res) => {
     });
 };
 
+const rateCourse = (req, res) => {
+    Course.findById(req.params.courseId).then((result) => {
+        result.ratings.push(req.body.rating);
+        result.save()
+            .then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'Course has been rated',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
+
 module.exports = {
     getCourses,
     createCourse,
@@ -311,4 +336,5 @@ module.exports = {
     deleteTest,
     deleteQuestion,
     editQuestion,
+    rateCourse,
 };

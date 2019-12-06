@@ -9,6 +9,7 @@ const courseSchema = mongoose.Schema({
     authorId: { type: String, required: true, trim: true },
     lessons: [lessonSchema],
     test: [testSchema],
+    ratings: [Number],
 });
 
 module.exports = mongoose.model('Course', courseSchema);

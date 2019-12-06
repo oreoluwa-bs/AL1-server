@@ -30,7 +30,8 @@ router.delete('/:courseId/test/', auth, tutor, db.deleteTest);
 
 router.put('/:courseId/test/:questionId', auth, tutor, db.editQuestion);
 
-// router.post('/login', auth, db.login);
+router.post('/:courseId/rate', auth, db.rateCourse);
 
+// router.post('/login', auth, db.login);
 
 module.exports = router;

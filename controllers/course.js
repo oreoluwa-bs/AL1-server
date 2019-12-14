@@ -4,6 +4,7 @@ const config = require('../config');
 const Course = require('../models/course');
 const { Lesson } = require('../models/lesson');
 const { Test } = require('../models/test');
+const User = require('../models/user');
 
 const getCourses = (req, res) => {
     Course.find().then((courses) => {
@@ -16,20 +17,53 @@ const getCourses = (req, res) => {
     });
 };
 
+const getCourse = (req, res) => {
+    Course.findById(req.params.courseId).then((course) => {
+        res.status(200).json(course);
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
 const createCourse = (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
-    const course = new Course({
-        title: req.body.title,
-        description: req.body.description,
-        authorId: jwt.verify(token, config.decrypt_me).userId,
-        ratings: [0],
-    });
 
-    course.save()
-        .then(() => {
-            res.status(201).json({
-                status: 'success',
-                message: 'Course Created',
+    User.findById(jwt.verify(token, config.decrypt_me).userId)
+        .then((userrr) => {
+            const course = new Course({
+                title: req.body.title,
+                description: req.body.description,
+                authorId: jwt.verify(token, config.decrypt_me).userId,
+                authorName: `${userrr.firstname} ${userrr.lastname}`,
+                ratings: [0],
+            });
+
+            course.save().then((ress) => {
+                const user = userrr;
+                user.createdCourses.push({
+                    _id: ress.id,
+                });
+
+                user.save().then(() => {
+                    res.status(201).json({
+                        status: 'success',
+                        data: ress.id,
+                        message: 'Course Created',
+                    });
+                }).catch((err) => {
+                    res.status(400).json({
+                        status: 'error',
+                        message: err,
+                    });
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
             });
         }).catch((err) => {
             res.status(400).json({
@@ -76,6 +110,7 @@ const deleteCourse = (req, res) => {
 
 const createLesson = (req, res) => {
     const lesson = new Lesson({
+        title: req.body.title,
         videoURL: req.body.url,
         textContent: req.body.textContent,
         references: {
@@ -142,6 +177,7 @@ const editLesson = (req, res) => {
         });
         const newLesson = new Lesson({
             _id: oldLesson.id,
+            title: req.body.title,
             videoURL: req.body.url,
             textContent: req.body.textContent,
             references: {
@@ -326,6 +362,7 @@ const rateCourse = (req, res) => {
 
 module.exports = {
     getCourses,
+    getCourse,
     createCourse,
     deleteCourse,
     editCourse,

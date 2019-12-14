@@ -10,6 +10,8 @@ const router = express.Router();
 
 router.get('/', db.getCourses);
 
+router.get('/:courseId', db.getCourse);
+
 router.post('/create-course', auth, tutor, db.createCourse);
 
 router.delete('/:courseId', auth, tutor, db.deleteCourse);

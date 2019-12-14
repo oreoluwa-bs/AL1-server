@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 
 const answerSchema = mongoose.Schema({
-    a: { type: String, trim: true },
-    b: { type: String, trim: true },
-    c: { type: String, trim: true },
-    d: { type: String, trim: true },
+    value: { type: String, trim: true },
+    text: { type: String, trim: true },
 });
 
 const testSchema = mongoose.Schema({

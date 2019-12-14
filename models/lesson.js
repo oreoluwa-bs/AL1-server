@@ -7,6 +7,7 @@ const referenceSchema = mongoose.Schema({
 });
 
 const lessonSchema = mongoose.Schema({
+    title: { type: String, trim: true, required: true },
     videoURL: { type: String, trim: true },
     textContent: { type: String },
     references: [referenceSchema],

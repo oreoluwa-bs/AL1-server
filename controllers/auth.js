@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 
 const User = require('../models/user');
+const Course = require('../models/course');
 
 const signup = (req, res) => {
     bcrypt.hash(req.body.password, 10).then((hash) => {
@@ -53,9 +54,12 @@ const login = (req, res) => {
                 config.decrypt_me,
                 { expiresIn: '24h' },
             );
+            // eslint-disable-next-line no-param-reassign
+            user.password = null;
             res.status(200).json({
                 status: 'success',
                 userId: user.id,
+                auth: user,
                 token,
             });
         }).catch((err) => {
@@ -86,18 +90,45 @@ const getUsers = (req, res) => {
     });
 };
 
-
 const editUser = (req, res) => {
     User.findById(req.params.userId).then((result) => {
         const oldUser = result;
-        bcrypt.hash(req.body.password, 10).then((hash) => {
+        if (req.body.password) {
+            bcrypt.hash(req.body.password, 10).then((hash) => {
+                const user = new User({
+                    _id: oldUser.id,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
+                    email: req.body.email,
+                    role: req.body.role,
+                    password: hash,
+                    enrolledCourses: oldUser.enrolledCourses,
+                });
+                User.updateOne({ _id: req.params.userId }, user).then(() => {
+                    res.status(200).json({
+                        status: 'success',
+                        message: 'User has been updated',
+                    });
+                }).catch((err) => {
+                    res.status(400).json({
+                        status: 'error',
+                        message: err,
+                    });
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+        } else {
             const user = new User({
                 _id: oldUser.id,
                 firstname: req.body.firstname,
                 lastname: req.body.lastname,
                 email: req.body.email,
                 role: req.body.role,
-                password: hash,
+                password: oldUser.password,
                 enrolledCourses: oldUser.enrolledCourses,
             });
             User.updateOne({ _id: req.params.userId }, user).then(() => {
@@ -111,12 +142,7 @@ const editUser = (req, res) => {
                     message: err,
                 });
             });
-        }).catch((err) => {
-            res.status(400).json({
-                status: 'error',
-                message: err,
-            });
-        });
+        }
     }).catch((err) => {
         res.status(400).json({
             status: 'error',
@@ -146,10 +172,45 @@ const deleteUser = (req, res) => {
     }
 };
 
+
+const enrollInCourse = (req, res) => {
+    Course.findById(req.params.courseId).then(() => {
+        User.findById(res.locals.userId).then((ress) => {
+            const user = ress;
+            user.enrolledCourses = [...user.enrolledCourses, {
+                isCompleted: false,
+                _id: req.params.courseId,
+            }];
+            user.save().then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'User successfully enrolled in course',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
+        });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
 module.exports = {
     signup,
     login,
     getUsers,
     deleteUser,
     editUser,
+    enrollInCourse,
 };

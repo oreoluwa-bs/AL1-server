@@ -18,4 +18,6 @@ router.put('/:userId', auth, db.editUser);
 router.delete('/:userId', auth, db.deleteUser);
 
 
+router.post('/enroll/:courseId', auth, db.enrollInCourse);
+
 module.exports = router;

@@ -9,7 +9,8 @@ const userSchema = mongoose.Schema({
     },
     password: { type: String, required: true, trim: true },
     role: { type: String, required: true, trim: true },
-    enrolledCourses: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Course' }],
+    enrolledCourses: [{ courseId: { type: mongoose.SchemaTypes.ObjectId, ref: 'Course' }, isCompleted: { type: Boolean, required: true } }],
+    createdCourses: [{ _id: { type: mongoose.SchemaTypes.ObjectId, ref: 'Course' } }],
 });
 
 userSchema.plugin(uniqueValidator);

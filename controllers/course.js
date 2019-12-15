@@ -76,15 +76,26 @@ const createCourse = (req, res) => {
 const editCourse = (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
     const editorId = jwt.verify(token, config.decrypt_me).userId;
-    const course = new Course({
-        _id: req.params.courseId,
-        title: req.body.title,
-        description: req.body.description,
-    });
-    Course.updateOne({ _id: req.params.courseId, authorId: editorId }, course).then(() => {
-        res.status(201).json({
-            status: 'success',
-            message: 'Course has been edited',
+    Course.findById(req.params.courseId).then((ress) => {
+        const course = new Course({
+            _id: req.params.courseId,
+            title: req.body.title,
+            description: req.body.description,
+            authorName: ress.authorName,
+            lessons: ress.lessons,
+            test: ress.test,
+            ratings: ress.ratings,
+        });
+        Course.updateOne({ _id: req.params.courseId, authorId: editorId }, course).then(() => {
+            res.status(201).json({
+                status: 'success',
+                message: 'Course has been edited',
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
         });
     }).catch((err) => {
         res.status(400).json({
@@ -215,12 +226,10 @@ const createTest = (req, res) => {
     const question = new Test({
         question: req.body.question,
         answer: req.body.answer,
-        answers: {
-            a: req.body.a,
-            b: req.body.b,
-            c: req.body.c,
-            d: req.body.d,
-        },
+        answers: [],
+    });
+    req.body.options.forEach((option) => {
+        question.answers.push({ value: option.value, text: option.text });
     });
     Course.findById(req.params.courseId).then((result) => {
         result.test.push(question);
@@ -303,18 +312,16 @@ const editQuestion = (req, res) => {
             _id: oldQuestion.id,
             question: req.body.question,
             answer: req.body.answer,
-            answers: {
-                _id: oldQuestion.answers.id,
-                a: req.body.a,
-                b: req.body.b,
-                c: req.body.c,
-                d: req.body.d,
-            },
+            answers: [],
+        });
+        req.body.options.forEach((option) => {
+            newQuestion.answers.push({ value: option.value, text: option.text });
         });
         const ed = result.test.findIndex((quest) => {
             const id = quest.id.toString();
             return id === req.params.questionId;
         });
+
         // eslint-disable-next-line no-param-reassign
         result.test[ed] = newQuestion;
         result.save().then(() => {

@@ -206,6 +206,42 @@ const enrollInCourse = (req, res) => {
     });
 };
 
+const completeCourse = (req, res) => {
+    Course.findById(req.params.courseId).then(() => {
+        User.findById(res.locals.userId).then((ress) => {
+            const user = ress;
+            const enrolled = user.enrolledCourses.findIndex((course) => (
+                course.id === req.params.courseId
+            ));
+            user.enrolledCourses[enrolled] = {
+                ...user.enrolledCourses[enrolled],
+                isCompleted: true,
+            };
+            user.save().then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'User successfully enrolled in course',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
+        });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
+
 module.exports = {
     signup,
     login,
@@ -213,4 +249,5 @@ module.exports = {
     deleteUser,
     editUser,
     enrollInCourse,
+    completeCourse,
 };

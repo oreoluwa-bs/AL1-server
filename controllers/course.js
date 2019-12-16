@@ -122,12 +122,12 @@ const deleteCourse = (req, res) => {
 const createLesson = (req, res) => {
     const lesson = new Lesson({
         title: req.body.title,
-        videoURL: req.body.url,
+        videoURL: req.body.videoUrl,
         textContent: req.body.textContent,
-        references: {
-            reference: req.body.reference,
-            referenceLink: req.body.link,
-        },
+        references: [],
+    });
+    req.body.references.forEach((ref) => {
+        lesson.references.push({ reference: ref.reference, link: ref.link });
     });
     Course.findById(req.params.courseId)
         .then((result) => {
@@ -189,14 +189,14 @@ const editLesson = (req, res) => {
         const newLesson = new Lesson({
             _id: oldLesson.id,
             title: req.body.title,
-            videoURL: req.body.url,
+            videoURL: req.body.videoUrl || oldLesson.videoURL,
             textContent: req.body.textContent,
-            references: {
-                _id: oldLesson.references.id,
-                reference: req.body.reference,
-                referenceLink: req.body.link,
-            },
+            references: [],
         });
+        req.body.references.forEach((ref) => {
+            newLesson.references.push({ reference: ref.reference, link: ref.link });
+        });
+
         const ed = result.lessons.findIndex((lesson) => {
             const id = lesson.id.toString();
             return id === req.params.lessonId;

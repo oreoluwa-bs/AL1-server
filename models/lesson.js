@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const referenceSchema = mongoose.Schema({
     reference: { type: String, trim: true },
-    referenceLink: { type: String, trim: true },
+    link: { type: String, trim: true },
 });
 
 const lessonSchema = mongoose.Schema({

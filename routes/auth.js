@@ -20,4 +20,6 @@ router.delete('/:userId', auth, db.deleteUser);
 
 router.post('/enroll/:courseId', auth, db.enrollInCourse);
 
+router.post('/complete/:courseId', auth, db.completeCourse);
+
 module.exports = router;

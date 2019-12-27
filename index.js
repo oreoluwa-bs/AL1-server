@@ -1,10 +1,13 @@
 /* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
-const config = require('../config');
+const path = require('path');
 
-const userRoutes = require('../routes/auth');
-const courseRoutes = require('../routes/course');
+const config = require('./config');
+
+const userRoutes = require('./routes/auth');
+const courseRoutes = require('./routes/course');
+const vidRoutes = require('./routes/videos');
 
 const app = express();
 
@@ -29,6 +32,7 @@ app.use(express.urlencoded({
     extended: true,
 }));
 
+
 app.listen(config.port, () => {
     console.log(`App is running on port ${config.port}`);
 });
@@ -40,8 +44,13 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/videos', express.static(path.join(__dirname, 'videos')));
+
 app.use('/api/v1/auth', userRoutes);
 
 app.use('/api/v1/course', courseRoutes);
+
+app.use('/api/v1/video', vidRoutes);
+
 
 module.exports = app;

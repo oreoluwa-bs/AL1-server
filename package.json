@@ -4,7 +4,7 @@
   "description": "This is handles all my api code",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app"
+    "start": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,8 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.7.13",
-    "mongoose-unique-validator": "^2.0.3"
+    "mongoose-unique-validator": "^2.0.3",
+    "multer": "^1.4.2"
   },
   "devDependencies": {
     "eslint": "^6.7.2",

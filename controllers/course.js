@@ -1,4 +1,8 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-console */
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
 const config = require('../config');
 
 const Course = require('../models/course');
@@ -105,11 +109,31 @@ const editCourse = (req, res) => {
     });
 };
 
+
 const deleteCourse = (req, res) => {
-    Course.deleteOne({ _id: req.params.courseId }).then(() => {
-        res.status(200).json({
-            status: 'success',
-            message: 'Course has been Deleted',
+    Course.findById(req.params.courseId).then((result) => {
+        const { lessons } = result;
+
+        lessons.forEach((lesson) => {
+            const url = `${req.protocol}://${req.get('host')}/videos`;
+            const fileme = lesson.videoURL.split(url)[1];
+            fs.unlink(`videos/${fileme}`, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        });
+
+        Course.deleteOne({ _id: req.params.courseId }).then(() => {
+            res.status(200).json({
+                status: 'success',
+                message: 'Course has been Deleted',
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
         });
     }).catch((err) => {
         res.status(400).json({
@@ -120,17 +144,18 @@ const deleteCourse = (req, res) => {
 };
 
 const createLesson = (req, res) => {
-    const lesson = new Lesson({
-        title: req.body.title,
-        videoURL: req.body.videoUrl,
-        textContent: req.body.textContent,
-        references: [],
-    });
-    req.body.references.forEach((ref) => {
-        lesson.references.push({ reference: ref.reference, link: ref.link });
-    });
-    Course.findById(req.params.courseId)
-        .then((result) => {
+    if (req.body.vidData) {
+        const url = `${req.protocol}://${req.get('host')}`;
+        const lesson = new Lesson({
+            title: req.body.title,
+            videoURL: `${url}/videos/${req.body.vidData.filename}`,
+            textContent: req.body.textContent,
+            references: [],
+        });
+        req.body.references.forEach((ref) => {
+            lesson.references.push({ reference: ref.reference, link: ref.link });
+        });
+        Course.findById(req.params.courseId).then((result) => {
             result.lessons.push(lesson);
             result.save()
                 .then(() => {
@@ -150,7 +175,39 @@ const createLesson = (req, res) => {
                 message: err,
             });
         });
+    } else {
+        const lesson = new Lesson({
+            title: req.body.title,
+            videoURL: null,
+            textContent: req.body.textContent,
+            references: [],
+        });
+        req.body.references.forEach((ref) => {
+            lesson.references.push({ reference: ref.reference, link: ref.link });
+        });
+        Course.findById(req.params.courseId).then((result) => {
+            result.lessons.push(lesson);
+            result.save()
+                .then(() => {
+                    res.status(200).json({
+                        status: 'success',
+                        message: 'Lesson created',
+                    });
+                }).catch((err) => {
+                    res.status(400).json({
+                        status: 'error',
+                        message: err,
+                    });
+                });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
+        });
+    }
 };
+
 
 const deleteLesson = (req, res) => {
     Course.findById(req.params.courseId)
@@ -158,6 +215,13 @@ const deleteLesson = (req, res) => {
             // eslint-disable-next-line no-param-reassign
             result.lessons = result.lessons.filter((lesson) => {
                 const id = lesson.id.toString();
+                const url = `${req.protocol}://${req.get('host')}/videos`;
+                const fileme = lesson.videoURL.split(url)[1];
+                fs.unlink(`videos/${fileme}`, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
                 return id !== req.params.lessonId;
             });
             result.save()
@@ -181,32 +245,40 @@ const deleteLesson = (req, res) => {
 };
 
 const editLesson = (req, res) => {
-    Course.findById(req.params.courseId).then((result) => {
-        const oldLesson = result.lessons.find((lesson) => {
-            const id = lesson.id.toString();
-            return id === req.params.lessonId;
-        });
-        const newLesson = new Lesson({
-            _id: oldLesson.id,
-            title: req.body.title,
-            videoURL: req.body.videoUrl || oldLesson.videoURL,
-            textContent: req.body.textContent,
-            references: [],
-        });
-        req.body.references.forEach((ref) => {
-            newLesson.references.push({ reference: ref.reference, link: ref.link });
-        });
+    if (req.body.vidData) {
+        const url = `${req.protocol}://${req.get('host')}`;
+        Course.findById(req.params.courseId).then((result) => {
+            const oldLesson = result.lessons.find((lesson) => {
+                const id = lesson.id.toString();
+                return id === req.params.lessonId;
+            });
+            const newLesson = new Lesson({
+                _id: oldLesson.id,
+                title: req.body.title,
+                videoURL: `${url}/videos/${req.body.vidData.filename}`,
+                textContent: req.body.textContent,
+                references: [],
+            });
+            req.body.references.forEach((ref) => {
+                newLesson.references.push({ reference: ref.reference, link: ref.link });
+            });
 
-        const ed = result.lessons.findIndex((lesson) => {
-            const id = lesson.id.toString();
-            return id === req.params.lessonId;
-        });
-        // eslint-disable-next-line no-param-reassign
-        result.lessons[ed] = newLesson;
-        result.save().then(() => {
-            res.status(200).json({
-                status: 'success',
-                message: 'Lesson Edited',
+            const ed = result.lessons.findIndex((lesson) => {
+                const id = lesson.id.toString();
+                return id === req.params.lessonId;
+            });
+            // eslint-disable-next-line no-param-reassign
+            result.lessons[ed] = newLesson;
+            result.save().then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'Lesson Edited',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
             });
         }).catch((err) => {
             res.status(400).json({
@@ -214,12 +286,47 @@ const editLesson = (req, res) => {
                 message: err,
             });
         });
-    }).catch((err) => {
-        res.status(400).json({
-            status: 'error',
-            message: err,
+    } else {
+        Course.findById(req.params.courseId).then((result) => {
+            const oldLesson = result.lessons.find((lesson) => {
+                const id = lesson.id.toString();
+                return id === req.params.lessonId;
+            });
+            const newLesson = new Lesson({
+                _id: oldLesson.id,
+                title: req.body.title,
+                videoURL: oldLesson.videoURL,
+                textContent: req.body.textContent,
+                references: [],
+            });
+            req.body.references.forEach((ref) => {
+                newLesson.references.push({ reference: ref.reference, link: ref.link });
+            });
+
+            const ed = result.lessons.findIndex((lesson) => {
+                const id = lesson.id.toString();
+                return id === req.params.lessonId;
+            });
+            // eslint-disable-next-line no-param-reassign
+            result.lessons[ed] = newLesson;
+            result.save().then(() => {
+                res.status(200).json({
+                    status: 'success',
+                    message: 'Lesson Edited',
+                });
+            }).catch((err) => {
+                res.status(400).json({
+                    status: 'error',
+                    message: err,
+                });
+            });
+        }).catch((err) => {
+            res.status(400).json({
+                status: 'error',
+                message: err,
+            });
         });
-    });
+    }
 };
 
 const createTest = (req, res) => {

@@ -34,6 +34,8 @@ router.put('/:courseId/test/:questionId', auth, tutor, db.editQuestion);
 
 router.post('/:courseId/rate', auth, db.rateCourse);
 
+router.post('/:courseId/flag', auth, db.flagCourse);
+
 // router.post('/login', auth, db.login);
 
 module.exports = router;

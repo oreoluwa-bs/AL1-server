@@ -8,6 +8,7 @@ const config = require('./config');
 const userRoutes = require('./routes/auth');
 const courseRoutes = require('./routes/course');
 const vidRoutes = require('./routes/videos');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -51,6 +52,8 @@ app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/course', courseRoutes);
 
 app.use('/api/v1/video', vidRoutes);
+
+app.use('/api/v1/admin', adminRoutes);
 
 
 module.exports = app;

@@ -9,6 +9,7 @@ const Course = require('../models/course');
 const { Lesson } = require('../models/lesson');
 const { Test } = require('../models/test');
 const User = require('../models/user');
+const ReportedCourses = require('../models/reportedCourses');
 
 const getCourses = (req, res) => {
     Course.find().then((courses) => {
@@ -473,6 +474,27 @@ const rateCourse = (req, res) => {
     });
 };
 
+const flagCourse = (req, res) => {
+    const course = new ReportedCourses({
+        courseId: req.body.courseId,
+        reason: req.body.reason,
+        title: req.body.title,
+        reporterId: req.body.reporterId,
+        reporterName: req.body.reporterName,
+        reportedDate: req.body.reportedDate,
+    });
+    course.save().then(() => {
+        res.status(200).json({
+            status: 'success',
+            message: 'Course has been flagged',
+        });
+    }).catch((err) => {
+        res.status(400).json({
+            status: 'error',
+            message: err,
+        });
+    });
+};
 
 module.exports = {
     getCourses,
@@ -488,4 +510,5 @@ module.exports = {
     deleteQuestion,
     editQuestion,
     rateCourse,
+    flagCourse,
 };

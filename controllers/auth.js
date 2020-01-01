@@ -15,10 +15,11 @@ const signup = (req, res) => {
             role: req.body.role,
             password: hash,
         });
-        user.save().then((data) => {
+        user.save().then(() => {
             res.status(200).json({
                 status: 'success',
-                data,
+                message: 'Account created',
+                // data,
             });
         }).catch((err) => {
             res.status(400).json({

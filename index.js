@@ -55,5 +55,23 @@ app.use('/api/v1/video', vidRoutes);
 
 app.use('/api/v1/admin', adminRoutes);
 
+// Contact us route
+app.post('/api/v1/contact-us', (req, res) => {
+    console.log({
+        name: req.body.name,
+        email: req.body.email,
+        message: req.body.message,
+    });
+    res.status(200).json({
+        status: 'success',
+    });
+});
+
+// Connect frontend to api on startup
+app.get('/api/v1/', (req, res) => {
+    res.status(200).json({
+        status: 'success',
+    });
+});
 
 module.exports = app;

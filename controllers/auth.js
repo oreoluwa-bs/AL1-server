@@ -243,6 +243,26 @@ const completeCourse = (req, res) => {
     });
 };
 
+const forgotPassword = (req, res) => {
+    User.findOne({ email: req.body.email }).then((user) => {
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid email',
+            });
+        }
+        res.status(200).json({
+            status: 'success',
+            message: 'Found email',
+        });
+    }).catch((err) => {
+        res.status(401).json({
+            status: 'success',
+            message: err,
+        });
+    });
+};
+
 module.exports = {
     signup,
     login,
@@ -251,4 +271,5 @@ module.exports = {
     editUser,
     enrollInCourse,
     completeCourse,
+    forgotPassword,
 };

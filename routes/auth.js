@@ -17,6 +17,7 @@ router.put('/:userId', auth, db.editUser);
 
 router.delete('/:userId', auth, db.deleteUser);
 
+router.post('/forgot-password', db.forgotPassword);
 
 router.post('/enroll/:courseId', auth, db.enrollInCourse);
 

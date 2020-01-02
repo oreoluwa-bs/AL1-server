@@ -13,6 +13,8 @@ router.post('/auth/create-user', db.signup);
 
 router.post('/auth/login', db.login);
 
+router.post('/forgotadminpassword', db.forgotPassword);
+
 router.delete('/admin/course/:courseId', auth, db.deleteReportedCourse);
 
 module.exports = router;

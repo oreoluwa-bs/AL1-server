@@ -113,9 +113,31 @@ const deleteReportedCourse = (req, res) => {
     }
 };
 
+const forgotPassword = (req, res) => {
+    AdminUser.findOne({ email: req.body.email }).then((user) => {
+        // console.log(user);
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid email',
+            });
+        }
+        res.status(200).json({
+            status: 'success',
+            message: 'Found email',
+        });
+    }).catch((err) => {
+        res.status(401).json({
+            status: 'success',
+            message: err,
+        });
+    });
+};
+
 module.exports = {
     signup,
     login,
     getReportedCourses,
     deleteReportedCourse,
+    forgotPassword,
 };

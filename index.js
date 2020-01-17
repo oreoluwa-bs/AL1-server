@@ -9,6 +9,7 @@ const userRoutes = require('./routes/auth');
 const courseRoutes = require('./routes/course');
 const vidRoutes = require('./routes/videos');
 const adminRoutes = require('./routes/admin');
+const dummyRoutes = require('./routes/dummy');
 
 const app = express();
 
@@ -73,5 +74,7 @@ app.get('/api/v1/', (req, res) => {
         status: 'success',
     });
 });
+
+app.use('/api/v1/dummy', dummyRoutes);
 
 module.exports = app;

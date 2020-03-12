@@ -2,6 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const socketio = require('socket.io');
+const http = require('http');
 
 const config = require('./config');
 
@@ -11,8 +13,14 @@ const vidRoutes = require('./routes/videos');
 const adminRoutes = require('./routes/admin');
 const dummyRoutes = require('./routes/dummy');
 
-const app = express();
+const {
+    addUser,
+    removeUser,
+    getUser,
+    getUsersInRoom,
+} = require('./controllers/discuss.js');
 
+const app = express();
 
 mongoose.connect(config.dbConnectionString, {
     useNewUrlParser: true,
@@ -35,9 +43,9 @@ app.use(express.urlencoded({
 }));
 
 
-app.listen(config.port, () => {
-    console.log(`App is running on port ${config.port}`);
-});
+// app.listen(config.port, () => {
+//     console.log(`App is running on port ${config.port}`);
+// });
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -76,5 +84,51 @@ app.get('/api/v1/', (req, res) => {
 });
 
 app.use('/api/v1/dummy', dummyRoutes);
+
+const User = require('./models/user');
+// Socket IO
+const server = http.createServer(app);
+const io = socketio(server);
+server.listen(config.port, () => {
+    console.log(`App is running on port ${config.port}`);
+});
+
+io.on('connection', (socket) => {
+    // eslint-disable-next-line consistent-return
+    socket.on('join', async ({ userId, room }, callback) => {
+        let userData = {};
+        await User.findById(userId).then((user) => {
+            userData = user;
+        }).catch(() => ({ error: 'User not found' }));
+
+        const { error, user } = addUser({ id: socket.id, userData, room });
+
+        if (error) return callback(error);
+
+        socket.join(user.room);
+
+        io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+        callback();
+    });
+
+
+    socket.on('sendComment', (message, callback) => {
+        const user = getUser(socket.id);
+
+        io.to(user.room).emit('comment', { user: user.name, text: message });
+        io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+
+        callback();
+    });
+
+    socket.on('disconnect', () => {
+        const user = removeUser(socket.id);
+
+        if (user) {
+            io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+        }
+    });
+});
+
 
 module.exports = app;
